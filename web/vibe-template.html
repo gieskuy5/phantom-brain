@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Vibe Template</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#050508;
+  --surface:rgba(255,255,255,.02);
+  --glass:rgba(136,176,208,.04);
+  --glass-h:rgba(136,176,208,.08);
+  --border:rgba(136,176,208,.1);
+  --border-a:rgba(136,176,208,.3);
+  --text:#c8d6e0;
+  --dim:#4a5c6a;
+  --bright:#e8f0f4;
+  --accent:#88B0D0;
+  --glow:rgba(136,176,208,.12);
+  --hot:#a8d0f0;
+  --green:#4ade80;
+  --red:#f87171;
+  --purple:#a78bfa;
+  --mono:'JetBrains Mono','Fira Code',monospace;
+  --sans:'Space Grotesk',sans-serif;
+}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font-family:var(--mono);font-size:.75rem;line-height:1.6;overflow-x:hidden;cursor:crosshair}
+
+/* ═══════════════════════════════════════════
+   1. NOISE TEXTURE OVERLAY
+   ═══════════════════════════════════════════ */
+body::before{content:'';position:fixed;inset:0;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");pointer-events:none;z-index:9999;opacity:.4}
+
+/* ═══════════════════════════════════════════
+   2. SCANLINE CRT OVERLAY
+   ═══════════════════════════════════════════ */
+body::after{content:'';position:fixed;inset:0;background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(136,176,208,.008) 2px,rgba(136,176,208,.008) 4px);pointer-events:none;z-index:9998}
+
+/* ═══════════════════════════════════════════
+   3. PARTICLES CANVAS
+   ═══════════════════════════════════════════ */
+#particles{position:fixed;inset:0;z-index:0;pointer-events:none}
+
+/* ═══════════════════════════════════════════
+   4. CURSOR TRAIL
+   ═══════════════════════════════════════════ */
+.cursor-dot{position:fixed;width:4px;height:4px;background:var(--accent);border-radius:50%;pointer-events:none;z-index:9997;opacity:0;transition:opacity .3s;box-shadow:0 0 8px var(--accent)}
+body:hover .cursor-dot{opacity:1}
+
+/* ═══════════════════════════════════════════
+   5. HERO SECTION
+   ═══════════════════════════════════════════ */
+.hero{position:relative;z-index:1;padding:100px 40px 80px;text-align:center;min-height:70vh;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.hero-grid{position:absolute;inset:0;background-image:linear-gradient(rgba(136,176,208,.03) 1px,transparent 1px),linear-gradient(90deg,rgba(136,176,208,.03) 1px,transparent 1px);background-size:60px 60px;mask-image:radial-gradient(ellipse 60% 50% at 50% 50%,black 20%,transparent 70%)}
+
+/* ═══════════════════════════════════════════
+   6. GLITCH TITLE
+   ═══════════════════════════════════════════ */
+.glitch{position:relative;font-family:var(--sans);font-size:clamp(2.5rem,6vw,4.5rem);font-weight:700;color:var(--bright);letter-spacing:-0.02em;margin-bottom:16px}
+.glitch::before,.glitch::after{content:attr(data-text);position:absolute;top:0;left:0;width:100%;height:100%;opacity:0}
+.glitch::before{color:#ff006e;animation:g1 5s infinite;clip-path:inset(0 0 80% 0)}
+.glitch::after{color:#00f5d4;animation:g2 5s infinite;clip-path:inset(80% 0 0 0)}
+@keyframes g1{0%,92%,100%{opacity:0;transform:none}93%{opacity:.8;transform:translate(-2px,-1px)}94%{opacity:0}95%{opacity:.6;transform:translate(2px,1px)}96%{opacity:0}}
+@keyframes g2{0%,94%,100%{opacity:0;transform:none}95%{opacity:.7;transform:translate(2px,2px)}96%{opacity:0}97%{opacity:.5;transform:translate(-1px,-2px)}98%{opacity:0}}
+
+.hero-sub{color:var(--dim);max-width:640px;margin:0 auto 40px;font-size:.8rem;line-height:1.8}
+
+/* ═══════════════════════════════════════════
+   7. HERO BADGE (pulsing dot)
+   ═══════════════════════════════════════════ */
+.hero-badge{display:inline-flex;align-items:center;gap:8px;padding:10px 24px;background:var(--glass);border:1px solid var(--border);border-radius:100px;font-size:.65rem;letter-spacing:.2em;text-transform:uppercase;color:var(--dim);margin-bottom:32px;backdrop-filter:blur(10px)}
+.hero-badge::before{content:'';width:6px;height:6px;background:var(--accent);border-radius:50%;box-shadow:0 0 12px var(--accent);animation:blink 2s ease infinite}
+
+/* ═══════════════════════════════════════════
+   8. STATS ROW
+   ═══════════════════════════════════════════ */
+.stats-row{display:flex;justify-content:center;gap:60px;flex-wrap:wrap}
+.stat{text-align:center}
+.stat-val{font-family:var(--sans);font-size:2rem;font-weight:700;color:var(--bright)}
+.stat-label{font-size:.6rem;color:var(--dim);text-transform:uppercase;letter-spacing:.2em;margin-top:6px}
+
+/* ═══════════════════════════════════════════
+   9. SCROLL HINT
+   ═══════════════════════════════════════════ */
+.scroll-hint{position:absolute;bottom:30px;left:50%;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:8px;color:var(--dim);font-size:.6rem;letter-spacing:.2em;text-transform:uppercase;animation:float 3s ease-in-out infinite}
+.scroll-hint::after{content:'';width:1px;height:30px;background:linear-gradient(to bottom,var(--dim),transparent)}
+
+/* ═══════════════════════════════════════════
+   10. CONTAINER
+   ═══════════════════════════════════════════ */
+.container{max-width:1200px;margin:0 auto;padding:0 24px 80px;position:relative;z-index:1}
+
+/* ═══════════════════════════════════════════
+   11. SECTION LABEL (› prefix)
+   ═══════════════════════════════════════════ */
+.section-label{font-family:var(--mono);font-size:.6rem;font-weight:500;letter-spacing:.2em;text-transform:uppercase;color:var(--dim);margin-bottom:20px;padding-left:2px;display:block}
+.section-label::before{content:'›';margin-right:8px;color:var(--accent)}
+
+/* ═══════════════════════════════════════════
+   12. BENTO GRID
+   ═══════════════════════════════════════════ */
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(340px,1fr));gap:16px;margin-bottom:40px}
+
+/* ═══════════════════════════════════════════
+   13. CARD — CORNER ACCENTS + GLASS
+   ═══════════════════════════════════════════ */
+.card{background:var(--glass);border:1px solid var(--border);border-radius:16px;padding:24px;position:relative;transition:all .4s;backdrop-filter:blur(10px);overflow:hidden}
+.card::before,.card::after{content:'';position:absolute;width:20px;height:20px;border-color:var(--accent);opacity:0;transition:opacity .4s}
+.card::before{top:-1px;left:-1px;border-top:1px solid;border-left:1px solid;border-radius:16px 0 0 0}
+.card::after{bottom:-1px;right:-1px;border-bottom:1px solid;border-right:1px solid;border-radius:0 0 16px 0}
+.card:hover{border-color:var(--border-a);transform:translateY(-2px);box-shadow:0 20px 60px rgba(0,0,0,.4),0 0 40px var(--glow)}
+.card:hover::before,.card:hover::after{opacity:.5}
+.card h3{font-family:var(--sans);font-size:.95rem;margin-bottom:20px;display:flex;align-items:center;gap:10px;color:var(--bright)}
+
+/* ═══════════════════════════════════════════
+   14. TABLE
+   ═══════════════════════════════════════════ */
+table{width:100%;border-collapse:collapse;font-size:.68rem}
+th{text-align:left;padding:10px 8px;color:var(--dim);font-weight:500;text-transform:uppercase;letter-spacing:.12em;font-size:.58rem;border-bottom:1px solid var(--border)}
+td{padding:10px 8px;border-bottom:1px solid rgba(136,176,208,.03)}
+tr{transition:all .2s}
+tr:hover td{background:rgba(136,176,208,.02);transform:translateX(2px)}
+
+/* ═══════════════════════════════════════════
+   15. BADGES
+   ═══════════════════════════════════════════ */
+.badge{display:inline-block;padding:3px 10px;border-radius:100px;font-size:.55rem;font-weight:600;text-transform:uppercase;letter-spacing:.08em}
+.b-green{background:rgba(74,222,128,.08);color:var(--green);border:1px solid rgba(74,222,128,.15)}
+.b-red{background:rgba(248,113,113,.08);color:var(--red);border:1px solid rgba(248,113,113,.15)}
+.b-blue{background:rgba(136,176,208,.08);color:var(--accent);border:1px solid rgba(136,176,208,.15)}
+.b-purple{background:rgba(167,139,250,.08);color:var(--purple);border:1px solid rgba(167,139,250,.15)}
+.b-dim{background:rgba(74,96,108,.1);color:var(--dim);border:1px solid rgba(74,96,108,.2)}
+
+/* ═══════════════════════════════════════════
+   16. BUTTON — BORDER TO FILL
+   ═══════════════════════════════════════════ */
+.btn{position:relative;padding:10px 22px;background:transparent;border:1px solid var(--accent);border-radius:8px;color:var(--accent);font-family:var(--mono);font-size:.65rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;transition:all .3s;overflow:hidden}
+.btn::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,var(--accent),var(--hot));opacity:0;transition:opacity .3s;z-index:-1}
+.btn:hover{color:var(--bg);border-color:transparent;box-shadow:0 0 24px var(--glow);transform:translateY(-1px)}
+.btn:hover::before{opacity:1}
+
+/* ═══════════════════════════════════════════
+   17. PROGRESS STEPS
+   ═══════════════════════════════════════════ */
+.steps{display:flex;gap:0;margin:20px 0;position:relative}
+.steps::before{content:'';position:absolute;top:10px;left:10px;right:10px;height:1px;background:var(--border)}
+.step{flex:1;display:flex;flex-direction:column;align-items:center;gap:8px;position:relative;z-index:1}
+.step-dot{width:20px;height:20px;border-radius:50%;border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:.5rem;background:var(--bg);transition:all .3s}
+.step.active .step-dot{border-color:var(--accent);box-shadow:0 0 12px var(--glow);animation:pulse 1.5s infinite}
+.step.done .step-dot{border-color:var(--green);background:rgba(74,222,128,.1);color:var(--green)}
+.step-label{font-size:.5rem;color:var(--dim);text-transform:uppercase;letter-spacing:.1em;text-align:center}
+.step.active .step-label{color:var(--accent)}
+.step.done .step-label{color:var(--green)}
+
+/* ═══════════════════════════════════════════
+   18. FOOTER
+   ═══════════════════════════════════════════ */
+footer{text-align:center;padding:40px;color:var(--dim);font-size:.6rem;border-top:1px solid var(--border);position:relative;z-index:1}
+footer a{color:var(--accent);text-decoration:none;transition:color .2s}
+footer a:hover{color:var(--hot)}
+
+/* ═══════════════════════════════════════════
+   ANIMATIONS
+   ═══════════════════════════════════════════ */
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+@keyframes pulse{0%,100%{box-shadow:0 0 8px var(--glow)}50%{box-shadow:0 0 20px var(--glow)}}
+@keyframes float{0%,100%{transform:translateX(-50%) translateY(0)}50%{transform:translateX(-50%) translateY(-8px)}}
+@keyframes fadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+.fade{animation:fadeUp .6s ease forwards;opacity:0}
+.f1{animation-delay:.1s}.f2{animation-delay:.2s}.f3{animation-delay:.3s}.f4{animation-delay:.4s}.f5{animation-delay:.5s}.f6{animation-delay:.6s}
+
+/* ═══════════════════════════════════════════
+   RESPONSIVE
+   ═══════════════════════════════════════════ */
+@media(max-width:768px){
+  .grid{grid-template-columns:1fr}
+  .stats-row{gap:24px}
+  .hero{padding:60px 20px 40px;min-height:auto}
+  .container{padding:0 16px 60px}
+  .steps{flex-direction:column;gap:12px;align-items:flex-start}
+  .steps::before{display:none}
+  .step{flex-direction:row;gap:12px}
+}
+</style>
+</head>
+<body>
+
+<!-- PARTICLES -->
+<canvas id="particles"></canvas>
+
+<!-- CURSOR -->
+<div class="cursor-dot" id="cursorDot"></div>
+
+<!-- ═══════════════════════════════════════════
+     HERO
+     ═══════════════════════════════════════════ -->
+<div class="hero">
+<div class="hero-grid"></div>
+<div style="position:relative;z-index:1">
+  <div class="hero-badge">Your Badge Text</div>
+  <div class="glitch" data-text="Your Title">Your Title</div>
+  <p class="hero-sub">Your subtitle goes here. Describe what this project does in one or two sentences.</p>
+  <div class="stats-row">
+    <div class="stat"><div class="stat-val">47</div><div class="stat-label">Metric One</div></div>
+    <div class="stat"><div class="stat-val">68%</div><div class="stat-label">Metric Two</div></div>
+    <div class="stat"><div class="stat-val">+12%</div><div class="stat-label">Metric Three</div></div>
+  </div>
+</div>
+<div class="scroll-hint"><span>Scroll</span></div>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     CONTENT
+     ═══════════════════════════════════════════ -->
+<div class="container">
+
+<!-- BENTO GRID -->
+<div class="grid fade f1">
+  <div class="card">
+    <h3>Card One</h3>
+    <p style="color:var(--dim)">Content goes here.</p>
+  </div>
+  <div class="card">
+    <h3>Card Two</h3>
+    <p style="color:var(--dim)">Content goes here.</p>
+  </div>
+</div>
+
+<!-- SECTION LABEL + TABLE -->
+<span class="section-label">01 — Your Section</span>
+<div class="card fade f2" style="margin-bottom:40px;overflow-x:auto">
+  <table>
+    <thead><tr><th>Col 1</th><th>Col 2</th><th>Col 3</th><th>Status</th></tr></thead>
+    <tbody>
+      <tr><td>Data A</td><td>Data B</td><td>Data C</td><td><span class="badge b-green">Active</span></td></tr>
+      <tr><td>Data D</td><td>Data E</td><td>Data F</td><td><span class="badge b-red">Lost</span></td></tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- SECTION LABEL + CARDS -->
+<span class="section-label">02 — Another Section</span>
+<div class="grid fade f3">
+  <div class="card">
+    <h3>Card Three</h3>
+    <p style="color:var(--dim)">More content.</p>
+    <button class="btn" style="margin-top:16px">Action</button>
+  </div>
+  <div class="card">
+    <h3>Card Four</h3>
+    <p style="color:var(--dim)">More content.</p>
+  </div>
+</div>
+
+<!-- PROGRESS STEPS -->
+<span class="section-label">03 — Pipeline</span>
+<div class="card fade f4" style="margin-bottom:40px">
+  <div class="steps">
+    <div class="step done"><div class="step-dot">✓</div><div class="step-label">Step 1</div></div>
+    <div class="step done"><div class="step-dot">✓</div><div class="step-label">Step 2</div></div>
+    <div class="step active"><div class="step-dot">3</div><div class="step-label">Step 3</div></div>
+    <div class="step"><div class="step-dot">4</div><div class="step-label">Step 4</div></div>
+  </div>
+</div>
+
+</div>
+
+<footer>Your Project &mdash; <a href="#">Link</a> &middot; Year</footer>
+
+<!-- ═══════════════════════════════════════════
+     JAVASCRIPT
+     ═══════════════════════════════════════════ -->
+<script>
+/* PARTICLES — mouse-reactive, connected lines */
+(function(){
+  var c=document.getElementById('particles'),x=c.getContext('2d'),pts=[],mx=-1e3,my=-1e3;
+  function rs(){c.width=window.innerWidth;c.height=window.innerHeight}rs();
+  window.addEventListener('resize',rs);
+  function P(){this.x=Math.random()*c.width;this.y=Math.random()*c.height;this.vx=(Math.random()-.5)*.3;this.vy=(Math.random()-.5)*.3;this.r=Math.random()*1.5+.5;this.o=Math.random()*.4+.1}
+  for(var i=0;i<50;i++)pts.push(new P());
+  function draw(){
+    x.clearRect(0,0,c.width,c.height);
+    for(var i=0;i<pts.length;i++){
+      var p=pts[i];p.x+=p.vx;p.y+=p.vy;
+      if(p.x<0)p.x=c.width;if(p.x>c.width)p.x=0;if(p.y<0)p.y=c.height;if(p.y>c.height)p.y=0;
+      var dx=p.x-mx,dy=p.y-my,d=Math.sqrt(dx*dx+dy*dy);
+      if(d<120){p.x+=dx*.01;p.y+=dy*.01}
+      x.beginPath();x.arc(p.x,p.y,p.r,0,Math.PI*2);
+      x.fillStyle='rgba(136,176,208,'+p.o+')';x.fill();
+      for(var j=i+1;j<pts.length;j++){
+        var p2=pts[j],dd=Math.sqrt(Math.pow(p.x-p2.x,2)+Math.pow(p.y-p2.y,2));
+        if(dd<150){x.beginPath();x.moveTo(p.x,p.y);x.lineTo(p2.x,p2.y);x.strokeStyle='rgba(136,176,208,'+(0.06*(1-dd/150))+')';x.lineWidth=.5;x.stroke()}
+      }
+    }
+    requestAnimationFrame(draw);
+  }
+  draw();
+  document.addEventListener('mousemove',function(e){mx=e.clientX;my=e.clientY});
+})();
+
+/* CURSOR TRAIL — lagging dot */
+(function(){
+  var dot=document.getElementById('cursorDot'),mx=0,my=0,dx=0,dy=0;
+  document.addEventListener('mousemove',function(e){mx=e.clientX;my=e.clientY});
+  function anim(){dx+=(mx-dx)*.15;dy+=(my-dy)*.15;dot.style.left=dx-2+'px';dot.style.top=dy-2+'px';requestAnimationFrame(anim)}anim();
+})();
+</script>
+</body>
+</html>
