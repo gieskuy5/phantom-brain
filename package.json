@@ -1,0 +1,24 @@
+{
+  "name": "phantom-brain",
+  "version": "1.0.0",
+  "description": "Autonomous AI Agent with Private, Monetizable Intelligence — Built on Story CDR",
+  "type": "module",
+  "main": "dist/src/index.js",
+  "scripts": {
+    "demo": "npx tsx demo/run-agent.ts",
+    "build": "tsc",
+    "test": "npx tsx demo/run-agent.ts"
+  },
+  "keywords": ["cdr", "story-protocol", "ai-agent", "private-data", "hackathon"],
+  "author": "Phantom Brain Team",
+  "license": "MIT",
+  "dependencies": {
+    "@piplabs/cdr-sdk": "^0.2.1",
+    "@story-protocol/core-sdk": "^1.4.4",
+    "viem": "^2.51.0"
+  },
+  "devDependencies": {
+    "tsx": "^4.22.3",
+    "typescript": "^6.0.3"
+  }
+}
